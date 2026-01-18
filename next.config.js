@@ -2,11 +2,11 @@
 const nextConfig = {
   images: {
     remotePatterns: [
-      { protocol: 'https', hostname: 'images.unsplash.com' },
-      { protocol: 'https', hostname: 'logo.clearbit.com' },
-      { protocol: 'https', hostname: 'upload.wikimedia.org' },
-      { protocol: 'https', hostname: 'www.gstatic.com' },
-      { protocol: 'https', hostname: 'via.placeholder.com' },
+      { protocol: "https", hostname: "images.unsplash.com" },
+      { protocol: "https", hostname: "logo.clearbit.com" },
+      { protocol: "https", hostname: "upload.wikimedia.org" },
+      { protocol: "https", hostname: "www.gstatic.com" },
+      { protocol: "https", hostname: "via.placeholder.com" },
     ],
   },
   reactStrictMode: true,
@@ -24,6 +24,6 @@ const nextConfig = {
     },
   },
   productionBrowserSourceMaps: false, // 👈 Tắt sourcemap cho frontend
-}
+};
 
-module.exports = nextConfig
+module.exports = nextConfig;
