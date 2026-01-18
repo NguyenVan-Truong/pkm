@@ -1,0 +1,56 @@
+variables:
+  IMAGE_TAG: "$CI_PIPELINE_ID.$CI_COMMIT_SHORT_SHA"
+  REACT_APP_Version: $CI_PIPELINE_ID
+  REACT_APP_HashCommit: $CI_COMMIT_SHORT_SHA
+  REACT_APP_DateBuild: $(date +'%Y-%m-%d')
+
+
+  
+stages:
+  - build
+  - deploy
+# before_script:
+#   - docker info
+cache:
+  key: ${CI_COMMIT_REF_SLUG}
+  paths:
+    - node_modules/
+    - .next/cache/
+
+build-dev:
+  stage: build
+  tags:
+    - runner-dev
+  script:
+    - echo "Update submodule"
+    - git submodule sync --recursive
+    - git submodule update --init --recursive --remote
+    - echo "Logging into Docker registry..."
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY_IMAGE
+    - docker build -t $CI_REGISTRY_IMAGE/$HARBOR_IMAGE_DEV/hacom.client.web.n11:$IMAGE_TAG --rm=true -f "./Dockerfile.node" .
+    - echo "Build docker image ...."
+    - echo "Push docker image to registry ..."
+    - docker push $CI_REGISTRY_IMAGE/$HARBOR_IMAGE_DEV/hacom.client.web.n11:$IMAGE_TAG
+    - docker rmi $CI_REGISTRY_IMAGE/$HARBOR_IMAGE_DEV/hacom.client.web.n11:$IMAGE_TAG
+  only:
+    - develop
+
+    
+deploy-dev:
+  stage: deploy
+  tags:
+    - runner-dev
+  script:
+    - echo "Updating image tag in values.yaml"
+    - export GIT_SSL_NO_VERIFY=true
+    - git clone --branch prod http://oauth2:$ACCESS_TOKEN_DEPLOY@$GIT_LAB/hacom/deploy/hacom.deploy.git temp_helm_chart
+    - cd temp_helm_chart/helm-chart/client-web-n11
+    - >
+      sed -i 's/tag: .*/tag: "'"$IMAGE_TAG"'"/g' values.yaml
+    - git config user.email "admin@gmail.com"
+    - git config user.name "root"
+    - git commit -am "Update image client pos tag to $IMAGE_TAG"
+    - >
+      git push http://oauth2:$ACCESS_TOKEN_DEPLOY@$GIT_LAB/hacom/deploy/hacom.deploy.git prod
+  only:
+    - develop
