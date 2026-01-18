@@ -9,8 +9,7 @@ const nextConfig = {
       { protocol: 'https', hostname: 'via.placeholder.com' },
     ],
   },
-  reactStrictMode: process.env.NODE_ENV !== "production",
-  output: "standalone",
+  reactStrictMode: true,
   compiler: {
     removeConsole:
       process.env.NODE_ENV === "production"
